@@ -6,6 +6,7 @@
 
 このアプリケーションは、ユーザーが動画ファイルをアップロードすると、以下の処理を行います。
 
+
 1.  **音声認識**: Google Cloud Speech-to-Text APIを使用して、動画の音声をテキストに変換します。
 2.  **字幕生成**: OpenAI API (GPTモデル) を使用して、認識されたテキストを元に字幕を生成します。
 3.  **字幕調整**: (必要に応じて) 生成された字幕のタイミングや表現を調整します。
@@ -46,16 +47,7 @@ cd video_subtitling_mvp
 npm install
 ```
 
-### 4. 環境変数の設定
-
-`.env.local` ファイルを作成し、以下の環境変数を設定してください。
-
-```
-GOOGLE_APPLICATION_CREDENTIALS=[GCPサービスアカウントキーのパス]
-OPENAI_API_KEY=[OpenAI APIキー]
-```
-
-### 5. 開発サーバーの起動
+### 4. 開発サーバーの起動
 
 ```bash
 npm run dev
