@@ -1,0 +1,31 @@
+# -----------------------------
+# .gitignore file for video_subtitling project
+# このファイルはGit管理から不要なファイルを除外するために生成されました。
+# -----------------------------
+
+# OS生成ファイル
+.DS_Store
+Thumbs.db
+
+# Pythonアーティファクト
+*.py[cod]
+__pycache__/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Node modules (もし使っとったら)
+node_modules/
+npm-debug.log*
+
+# Next.js build directory
+.next/
+
+# ログファイル
+logs/
+*.log
+
+# 仮想環境
+env/
+venv/ 
