@@ -27,9 +27,6 @@
 
 *   Node.js (バージョン18以上推奨)
 *   npm (またはyarn)
-*   Google Cloud Platform (GCP) プロジェクト
-    *   Speech-to-Text APIの有効化
-    *   サービスアカウントキーの作成 (JSON形式)
 *   OpenAI APIキー
 
 ### 2. プロジェクトのクローン
