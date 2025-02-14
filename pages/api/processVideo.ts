@@ -73,7 +73,7 @@ async function performTranscription(audioFilePath: string, apiKey: string): Prom
     return transcription.segments.map((segment: any) => ({
       startTime: segment.start * 1000,
       endTime: segment.end * 1000,
-      text: segment.text
+      text: segment.text.trim()
     }));
   } catch (error) {
     console.error('Transcription error:', error);
@@ -81,12 +81,12 @@ async function performTranscription(audioFilePath: string, apiKey: string): Prom
   }
 }
 
-// 新たに、英語のテキストを日本語に翻訳する関数を追加する
+// 翻訳関数を改善：より自然な日本語訳を得るためのプロンプトを追加
 async function translateText(text: string, apiKey: string): Promise<string> {
   const openai = new OpenAI({ apiKey });
-  const prompt = `Translate the following English text to Japanese:\n\n${text}`;
+  const prompt = `以下の英語のセリフを、自然な日本語に翻訳してください。文脈や話し言葉のニュアンスを保ちながら翻訳してください：\n\n${text}`;
   const response = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4o-mini",
     messages: [{ role: "user", content: prompt }],
     temperature: 0.3,
   });
@@ -121,7 +121,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Whisperで文字起こし
     const subtitleSegments = await performTranscription(audioFilePath, apiKey);
 
-    // 字幕をSRT形式に変換
+    // 字幕をSRT形式に変換（セグメントごとに処理）
     let subtitleIndex = 1;
     let srtContent = "";
     const formatTime = (ms: number) => {
@@ -132,33 +132,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')},${String(milliseconds).padStart(3, '0')}`;
     };
 
-    // 各セグメントを「。」で分割して、より細かい字幕エントリに変換し、日本語に翻訳する
+    // Whisperのセグメントをそのまま使用して字幕を生成
     for (const segment of subtitleSegments) {
-      const sentences = segment.text.split("。")
-        .map(s => s.trim())
-        .filter(s => s !== "");
-      const totalDuration = segment.endTime - segment.startTime;
-      const sentenceDuration = totalDuration / sentences.length;
-      for (let i = 0; i < sentences.length; i++) {
-        const englishSentence = sentences[i];
-        const japaneseSentence = await translateText(englishSentence, apiKey);
-        const start = segment.startTime + i * sentenceDuration;
-        const end = start + sentenceDuration;
-        srtContent += `${subtitleIndex}\n${formatTime(Math.round(start))} --> ${formatTime(Math.round(end))}\n${japaneseSentence}\n\n`;
-        subtitleIndex++;
-      }
+      // 空のテキストはスキップ
+      if (!segment.text.trim()) continue;
+
+      // 英語から日本語への翻訳
+      const japaneseSentence = await translateText(segment.text, apiKey);
+      
+      // 最小表示時間を設定（500ms）
+      const minDuration = 500;
+      const duration = segment.endTime - segment.startTime;
+      const endTime = segment.startTime + Math.max(duration, minDuration);
+
+      srtContent += `${subtitleIndex}\n${formatTime(Math.round(segment.startTime))} --> ${formatTime(Math.round(endTime))}\n${japaneseSentence}\n\n`;
+      subtitleIndex++;
     }
 
     // SRTファイルを保存
     fs.writeFileSync(subtitleFilePath, srtContent);
 
-    // ffmpegを使って動画に字幕を焼き付ける
+    // ffmpegコマンドを改善：フォントスタイルとサイズを調整
     let ffmpegCmd;
     if (srtContent.trim().length === 0) {
       console.log("字幕が生成されなかったため、動画変換に字幕を適用しませんでした。");
       ffmpegCmd = `ffmpeg -y -i "${inputFilePath}" -c copy "${outputFilePath}"`;
     } else {
-      ffmpegCmd = `ffmpeg -y -i "${inputFilePath}" -vf subtitles="${subtitleFilePath}:charenc=UTF-8:force_style='Alignment=2,FontName=Arial,FontSize=24,MarginV=40'" "${outputFilePath}"`;
+      ffmpegCmd = `ffmpeg -y -i "${inputFilePath}" -vf "subtitles=${subtitleFilePath}:force_style='Alignment=2,FontName=Noto Sans CJK JP,FontSize=24,PrimaryColour=&HFFFFFF,OutlineColour=&H000000,BorderStyle=3,Outline=1,Shadow=0,MarginV=35'" -c:a copy "${outputFilePath}"`;
     }
     await execAsync(ffmpegCmd);
 
