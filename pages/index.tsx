@@ -2,18 +2,18 @@ import React, { useState } from 'react';
 
 const HomePage: React.FC = () => {
   const [apiKey, setApiKey] = useState('');
-  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [youtubeUrl, setYoutubeUrl] = useState('');
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!videoFile) {
-      setMessage("動画ファイルを選択してな！");
+    if (!youtubeUrl) {
+      setMessage("YouTubeのURLを入力してな！");
       return;
     }
     setMessage("処理中や、ちょっと待ってや～");
     const formData = new FormData();
-    formData.append("video", videoFile);
+    formData.append("youtubeUrl", youtubeUrl);
     formData.append("apiKey", apiKey);
 
     try {
@@ -58,7 +58,7 @@ const HomePage: React.FC = () => {
         textAlign: "center",
         marginBottom: "40px",
         textShadow: "2px 2px 4px rgba(0,0,0,0.1)"
-      }}>動画自動字幕生成システム</h1>
+      }}>YouTube動画自動字幕生成システム</h1>
       
       <div style={{
         background: "white",
@@ -74,31 +74,23 @@ const HomePage: React.FC = () => {
               color: "#34495e",
               fontWeight: "bold"
             }}>
-              動画ファイル (MP4)
+              YouTube URL
             </label>
-            <div style={{
-              border: "2px dashed #3498db",
-              borderRadius: "10px",
-              padding: "20px",
-              textAlign: "center",
-              transition: "all 0.3s ease",
-              cursor: "pointer",
-              backgroundColor: "#f7f9fc"
-            }}>
-              <input 
-                type="file" 
-                accept="video/mp4" 
-                onChange={(e) => {
-                  if(e.target.files && e.target.files[0]){
-                    setVideoFile(e.target.files[0]);
-                  }
-                }}
-                style={{ 
-                  width: "100%",
-                  cursor: "pointer"
-                }}
-              />
-            </div>
+            <input 
+              type="url" 
+              value={youtubeUrl} 
+              onChange={(e) => setYoutubeUrl(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: "8px",
+                border: "2px solid #e0e0e0",
+                fontSize: "16px",
+                transition: "all 0.3s ease",
+                outline: "none",
+              }}
+              placeholder="https://www.youtube.com/watch?v=..."
+            />
           </div>
           
           <div style={{ marginBottom: "25px" }}>
@@ -165,7 +157,7 @@ const HomePage: React.FC = () => {
       )}
       
       <style jsx>{`
-        input[type="password"]:focus {
+        input[type="password"]:focus, input[type="url"]:focus {
           border-color: #3498db;
           box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
         }
