@@ -6,7 +6,7 @@
     "build": "next build",
     "start": "next start",
     "install": "echo 'Skipping default install step'",
-    "vercel-build": "echo 'No custom build step needed'"
+    "vercel-build": "apt-get update && apt-get install -y python3 && npm install && npm run build"
   },
   "dependencies": {
     "fluent-ffmpeg": "^2.1.3",
