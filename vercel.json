@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npm run build",
+  "installCommand": "apt-get update && apt-get install -y python3 && npm install",
+  "framework": "nextjs"
+} 
