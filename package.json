@@ -5,7 +5,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "vercel-build": "your-build-command"
+    "install": "echo 'Skipping default install step'",
+    "vercel-build": "echo 'No custom build step needed'"
   },
   "dependencies": {
     "fluent-ffmpeg": "^2.1.3",
