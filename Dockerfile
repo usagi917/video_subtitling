@@ -1,20 +1,33 @@
-FROM node:18-buster
+FROM ubuntu:latest
 
-# Python3のインストール
-RUN apt-get update && apt-get install -y python3 && ln -s /usr/bin/python3 /usr/bin/python
+RUN apt-get update && apt-get install -y python3
 
+# Node.jsの環境も必要やから、Node.jsのイメージをベースにする
+FROM node:20-slim AS builder
+
+# 作業ディレクトリを設定
 WORKDIR /app
-
-# package.jsonとpackage-lock.jsonをコピーして依存関係をインストール
-COPY package*.json ./
-RUN npm install
 
 # アプリケーションのソースコードをコピー
 COPY . .
 
-# Next.jsのビルド
+# Pythonのインストール
+RUN apt-get update && apt-get install -y -q python3 python3-pip
+
+# npm install 実行時に、pythonの場所を教える
+ENV PYTHON=/usr/bin/python3
+
+# 依存関係をインストール
+RUN npm install
+
+# ビルド
 RUN npm run build
 
-EXPOSE 3000
+# 実行用のイメージ
+FROM node:20-slim
+
+WORKDIR /app
+
+COPY --from=builder /app ./
 
 CMD ["npm", "start"] 
