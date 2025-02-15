@@ -43,6 +43,43 @@ const HomePage: React.FC = () => {
     }
   };
 
+  const handlePodcastGeneration = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!youtubeUrl) {
+      setMessage("YouTubeのURLを入力してな！");
+      return;
+    }
+    setMessage("Podcast作成中や、ちょっと待ってや～");
+    const formData = new FormData();
+    formData.append("youtubeUrl", youtubeUrl);
+    formData.append("apiKey", apiKey);
+
+    try {
+      const res = await fetch("/api/generatePodcast", {
+        method: "POST",
+        body: formData
+      });
+      
+      if (!res.ok) {
+        const errText = await res.text();
+        setMessage("エラー: " + errText);
+        return;
+      }
+      
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "podcast.mp3";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setMessage("Podcast作成完了！ダウンロード開始やで。");
+    } catch (err) {
+      setMessage("エラー発生: " + String(err));
+    }
+  };
+
   return (
     <div style={{ 
       padding: "40px",
@@ -119,7 +156,7 @@ const HomePage: React.FC = () => {
             />
           </div>
           
-          <div style={{ textAlign: "center" }}>
+          <div style={{ textAlign: "center", display: "flex", gap: "20px", justifyContent: "center" }}>
             <button 
               type="submit"
               style={{
@@ -135,6 +172,23 @@ const HomePage: React.FC = () => {
               }}
             >
               字幕作成開始
+            </button>
+            <button 
+              onClick={handlePodcastGeneration}
+              type="button"
+              style={{
+                padding: "15px 40px",
+                fontSize: "18px",
+                backgroundColor: "#2ecc71",
+                color: "white",
+                border: "none",
+                borderRadius: "30px",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                boxShadow: "0 4px 6px rgba(46,204,113,0.2)",
+              }}
+            >
+              Podcast生成
             </button>
           </div>
         </form>
@@ -162,7 +216,7 @@ const HomePage: React.FC = () => {
           box-shadow: 0 0 0 3px rgba(52,152,219,0.2);
         }
         
-        button[type="submit"] {
+        button[type="submit"], button[type="button"] {
           padding: 15px 40px;
           font-size: 18px;
           background-color: #3498db;
@@ -174,10 +228,17 @@ const HomePage: React.FC = () => {
           box-shadow: 0 4px 6px rgba(52,152,219,0.2);
         }
         
-        button[type="submit"]:hover {
-          background-color: #2980b9;
+        button[type="submit"]:hover, button[type="button"]:hover {
           transform: translateY(-2px);
           box-shadow: 0 6px 8px rgba(52,152,219,0.3);
+        }
+        
+        button[type="submit"]:hover {
+          background-color: #2980b9;
+        }
+        
+        button[type="button"]:hover {
+          background-color: #27ae60;
         }
         
         @keyframes fadeIn {
