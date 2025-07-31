@@ -5,8 +5,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "preinstall": "apt-get update && apt-get install -y python3 && ln -sf $(command -v python3) /usr/local/bin/python",
-    "install": "echo 'Skipping default install step'",
+    "preinstall": "ln -sf $(command -v python3) /usr/local/bin/python || true",
     "vercel-build": "npm run build"
   },
   "dependencies": {
