@@ -1,4 +1,4 @@
-FROM node:20-slim
+FROM node:24-slim
 
 # 作業ディレクトリを設定
 WORKDIR /app
@@ -18,7 +18,7 @@ COPY . .
 # RUN npm run build
 
 # 実行用のイメージ
-# FROM node:20-slim
+# FROM node:24-slim
 
 # WORKDIR /app
 
